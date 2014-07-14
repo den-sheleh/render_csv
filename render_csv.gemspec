@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = RenderCsv::VERSION
 
-  gem.add_dependency('rails', '>= 3.0')
+  gem.add_dependency('rails', '>= 4.0')
 
   gem.add_development_dependency('rspec-rails', '>= 2.12')
   gem.add_development_dependency('sqlite3', '>= 1.3')

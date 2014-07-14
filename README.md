@@ -9,9 +9,9 @@ Rails CSV renderer for ActiveRecord collections
 
 ## Rails & Ruby Versions Supported
 
-*Rails:* 3.0.x - 4.0.x
+*Rails:* 4.x
 
-*Ruby:* 1.9.3, 2.0.0 and 2.1.0
+*Ruby:* 2.0.x and 2.1.x
 
 ## Installation
 
