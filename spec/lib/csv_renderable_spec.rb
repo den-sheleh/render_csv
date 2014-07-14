@@ -6,11 +6,20 @@ describe RenderCsv::CsvRenderable do
     Dog.create(name: "Sebastian O'Connor", age: 3, weight: 76.8)
     Dog.create(name: 'Ruby', age: 3, weight: 68.2)
     Dog.create(name: 'Shelby', age: 5, weight: 64.0)
+    Cat.create(name: 'Kitty')
   end
 
   let(:csv_renderable_array) { array.extend RenderCsv::CsvRenderable }
 
   context 'object is an array' do
+
+    context 'nil' do
+      let(:array) { nil }
+
+      it 'returns an empty string' do
+        expect(csv_renderable_array.to_custom_csv).to eql("")
+      end
+    end
 
     context 'array is empty' do
       let(:array) { Array.new }
@@ -94,4 +103,29 @@ describe RenderCsv::CsvRenderable do
       end
     end
   end
+
+  context 'header and row columns defined by methods' do
+    let(:array) { Cat.all }
+
+    it 'includes specified method values' do
+      expect(csv_renderable_array.to_custom_csv).to eql "ID,Cat's name\n1,Kitty\n"
+    end
+  end
+
+  context 'object is an empty ActiveRelation' do
+    let(:array) { Dog.where(age: 123) }
+
+    it 'includes header' do
+      expect(csv_renderable_array.to_custom_csv).to eql "Id,Name,Age,Weight\n"
+    end
+  end
+
+  context 'object is array of ActiveRecords' do
+    let(:array) { [Dog.first] }
+
+    it 'includes header' do
+      expect(csv_renderable_array.to_custom_csv).to eql "Id,Name,Age,Weight\n1,Sebastian O'Connor,3,76.8\n"
+    end
+  end
+
 end

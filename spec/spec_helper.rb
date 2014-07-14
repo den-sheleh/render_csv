@@ -23,6 +23,10 @@ ActiveRecord::Schema.define(version: 1) do
     t.integer :age
     t.float :weight
   end
+
+  create_table :cats, force: true do |t|
+    t.string :name
+  end
 end
 
 RSpec.configure do |config|
@@ -38,5 +42,17 @@ class Dog < ActiveRecord::Base
     else
       (2 * 10.5 + (age - 2) * 4).to_i
     end
+  end
+end
+
+class Cat < ActiveRecord::Base
+  validates_presence_of :name
+
+  def self.csv_header
+    ['ID', 'Cat\'s name']
+  end
+
+  def csv_row
+    [id, name]
   end
 end

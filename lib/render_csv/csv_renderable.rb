@@ -9,9 +9,31 @@ module RenderCsv
     # :add_methods => [:method1, :method2] # Include addtional methods that aren't columns
     # :attributes => [:col1, :method1, :col2, :col3] # Override set of attributes in specific order
     # :csv_options => { col_sep: '\t', row_sep: '\r\n' } # Optional set of CSV options
-    def to_custom_csv(options = {})
-      return to_csv unless is_a?(ActiveRecord::Relation)
 
+    def to_custom_csv(options = {})
+      csv_options = default_csv_options.merge(options[:csv_options] || {})
+
+      if is_active_record?
+        if !(model.respond_to?(:csv_header) || model.respond_to?(:csv_row)) || model.class_variable_defined?(:@@dynamic_generated_csv_methods)
+          define_csv_methods(options)
+        end
+      end
+
+      CSV.generate(csv_options) do |csv|
+        if is_active_record?
+          csv << model.csv_header
+          self.each do |obj|
+            csv << obj.csv_row
+          end
+        else
+          csv << self if respond_to?(:to_csv)
+        end
+      end
+    end
+
+    private
+
+    def define_csv_methods(options)
       if options[:attributes]
         columns = options[:attributes]
       else
@@ -21,24 +43,17 @@ module RenderCsv
         columns += options[:add_methods].map(&:to_s) if options[:add_methods]
       end
 
-      csv_options = default_csv_options.merge(options[:csv_options] || {})
-
-      CSV.generate(csv_options) do |row|
-        row << localized_header(columns)
-        self.each do |obj|
-          row << columns.map { |c| obj.send(c) }
-        end
-      end
+      model.class_variable_set(:@@dynamic_generated_csv_methods, true)
+      model.class_eval "class << self; def csv_header; [\"#{ columns.map { |column_name| model.human_attribute_name(column_name) }.join('", "') }\"]; end; end"
+      model.class_eval "def csv_row; [#{ columns.join(', ') }]; end"
     end
 
-    private
-
-    def localized_header(columns)
-      columns.map { |column_name| model.human_attribute_name(column_name) }
+    def is_active_record?
+      is_a?(ActiveRecord::Relation) || (present? && first.is_a?(ActiveRecord::Base))
     end
 
     def model
-      @model ||= klass
+      @model ||= is_a?(ActiveRecord::Relation) ? klass : first.class
     end
 
     def default_csv_options
