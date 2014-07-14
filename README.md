@@ -107,6 +107,24 @@ end
 If you have translations for model's attributes under scope [:activerecord, :attributes, *model*] column names will be
 automatically translated.
 
+### Customize csv based on model methods
+
+If you want to customize your csv file in more flexible way you can do it by defining methods 'csv_header'(class method), 'csv_row' on model.
+'csv_header' should return array, which include names of columns.
+'csv_row' return array of values for instance of model.
+
+```ruby
+class Cat < ActiveRecord::Base
+  def self.csv_header
+    ["ID", "Cat's name"]
+  end
+
+  def csv_row
+    [id, name]
+  end
+end
+```
+
 ## Copyright
 
 Copyright © 2011-2014 Peter Brown. See LICENSE.txt for

@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.3.0
+  * Add csv configuration based on class methods
+
 ## 2.2.0
   * Add :attributes option.
   * Add :csv_options option.
